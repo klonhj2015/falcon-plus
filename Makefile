@@ -44,11 +44,17 @@ fmt-check:
 	fi;
 
 $(CMD):
-	go build -o bin/$@/falcon-$@ ./modules/$@
+	if [ $@ = "gateway" ]; then \
+		go build -ldflags "-X main.BinaryName=gateway -X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" \
+			-o bin/gateway/falcon-gateway ./modules/transfer ; \
+	else \
+		go build -ldflags "-X main.BinaryName=$@ -X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" \
+			-o bin/$@/falcon-$@ ./modules/$@ ; \
+	fi
 
 .PHONY: $(TARGET)
 $(TARGET): $(GOFILES)
-	go build -ldflags "-X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" -o open-falcon
+	go build -ldflags "-X main.BinaryName=Open-Falcon -X main.GitCommit=`git rev-parse --short HEAD` -X main.Version=$(VERSION)" -o open-falcon
 
 checkbin: bin/ config/ open-falcon
 
